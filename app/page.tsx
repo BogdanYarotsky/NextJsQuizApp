@@ -37,6 +37,8 @@ export default function Home() {
           height={37}
           priority
         />
+
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/DWFGa2ludLY?si=Hjtg6AfJ1iIm_RKK" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
       </div>
 
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
