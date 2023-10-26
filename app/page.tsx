@@ -1,52 +1,102 @@
 "use client";
 import { useState } from "react";
-import { usePathname, useRouter } from 'next/navigation';
 
-function extractYouTubeId(url: string) {
+const extractYouTubeIdError = new Error('Не зміг зчитати посилання на трансляцію.');
+
+function extractYouTubeId(youtubeVideoUrl: string) {
   try {
-    const parsedUrl = new URL(url);
-    let videoId = null;
+    const parsedUrl = new URL(youtubeVideoUrl);
 
-    if (parsedUrl.hostname === "www.youtube.com" || parsedUrl.hostname === "youtube.com") {
-      if (parsedUrl.pathname === "/watch") {
-        const searchParams = new URLSearchParams(parsedUrl.search);
-        videoId = searchParams.get('v');
-      } else if (parsedUrl.pathname.startsWith("/live/")) {
-        videoId = parsedUrl.pathname.split("/")[2];
-      }
+    if (parsedUrl.hostname !== "www.youtube.com" && parsedUrl.hostname !== "youtube.com") {
+      return new Error('Посилання на трансляцію не з ютуба.');
     }
 
-    return videoId;
+    if (parsedUrl.pathname === "/watch") {
+      const searchParams = new URLSearchParams(parsedUrl.search);
+      const videoId = searchParams.get('v');
+      return searchParams.get('v') ?? extractYouTubeIdError;
+    }
+
+    if (parsedUrl.pathname.startsWith("/live/")) {
+      return parsedUrl.pathname.split("/")[2];
+    }
+
+    return extractYouTubeIdError;
   } catch (error) {
-    console.error("Invalid URL");
-    return null;
+    return extractYouTubeIdError;
   }
 }
 
-export default function Home() {
-  const router = useRouter();
-  const [videoField, setVideoField] = useState<string>('');
-  const [roundFields, setRoundFields] = useState<string[]>(['']);
+function extractFormsIds(formUrls: string[]): (string | Error)[] {
+  return formUrls.map(url => {
+    try {
+      const parsedUrl = new URL(url);
+      if (parsedUrl.hostname !== "forms.gle") {
+        return new Error("URL is not a Google Forms URL");
+      }
+      const pathSegments = parsedUrl.pathname.split("/");
+      const formId = pathSegments[pathSegments.length - 1];
+      return formId;
 
-  const handleRoundChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
-    const values = [...roundFields];
-    values[index] = event.target.value;
-    setRoundFields(values);
+    } catch (error) {
+      return new Error("Invalid Google Forms Url");
+    }
+  });
+}
+
+function buildQuizUrl(youtubeUrl: string, formUrls: string[]): string | Error {
+  const youtubeId = extractYouTubeId(youtubeUrl);
+  if (youtubeId instanceof Error) {
+    return youtubeId;
+  }
+
+  const formsIds = extractFormsIds(formUrls);
+  const formIdsErrors = formsIds.filter(formId => formId instanceof Error) as Error[];
+  if (formIdsErrors.length > 0) {
+    return new Error(formIdsErrors.map(err => err.message).join(' '));
+  }
+
+  // at this stage we 100% that formIds don't have Error entries
+  const validFormIds = formsIds as string[];
+
+  const queryParams = {
+    video: youtubeId,
+    forms: validFormIds.join('.')
+  }
+
+  return "/quiz?" + new URLSearchParams(queryParams).toString();
+}
+
+export default function Home() {
+  const [youtubeUrl, setYoutubeUrl] = useState<string>('');
+  const [formUrls, setFormUrls] = useState<string[]>(['', '']);
+
+  const handleFormUrlChange = (index: number, value: string) => {
+    setFormUrls(formUrls.map((url, i) => i === index ? value : url));
   };
 
-  const handleRemoveField = () => {
-    if (roundFields.length < 2) return;
-    setRoundFields(roundFields.slice(0, -1));
+  const addFormUrlField = () => {
+    setFormUrls([...formUrls.slice(0, -1), '', ...formUrls.slice(-1)])
+  };
+
+  const removeFormUrlField = () => {
+    if (formUrls.length <= 2) return;
+    setFormUrls([...formUrls.slice(0, -2), ...formUrls.slice(-1)]);
   };
 
   const openLinkInNewTab = () => {
-    const video = extractYouTubeId(videoField);
-    const queryParams = {
-      video: video ?? "null",
-      rounds: "tbd"
+    const urlOrError = buildQuizUrl(youtubeUrl, formUrls);
+
+    if (urlOrError instanceof Error) {
+      window.alert(urlOrError.message);
+      return;
     }
-    const url = "/quiz?" + new URLSearchParams(queryParams).toString();
-    window.open(url, '_blank');
+
+    window.open(urlOrError, '_blank');
+  }
+
+  const getRoundString = (index: number) => {
+    return index == formUrls.length - 1 ? "Фінал" : "Тур " + index;
   }
 
   return (
@@ -54,35 +104,35 @@ export default function Home() {
       <div className="mb-2">
         <div>Лінк на трансляцію:</div>
         <input className="border rounded px-2 py-1 ml-2"
-          value={videoField}
-          onChange={event => setVideoField(event.target.value)}
+          value={youtubeUrl}
+          onChange={event => setYoutubeUrl(event.target.value)}
           type="text"
         />
       </div>
       <div>
         <button
           className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full mr-2"
-          onClick={() => setRoundFields([...roundFields, ''])}>Додати тур</button>
+          onClick={addFormUrlField}>Додати тур</button>
         <button
           className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full mr-2"
-          onClick={handleRemoveField}>Прибрати тур</button>
+          onClick={removeFormUrlField}>Прибрати тур</button>
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mr-2"
-          onClick={handleRemoveField}>Лінк</button>
+          onClick={removeFormUrlField}>Лінк</button>
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mr-2"
-          onClick={handleRemoveField}>Опис</button>
+          onClick={removeFormUrlField}>Опис</button>
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
           onClick={openLinkInNewTab}>Превью</button>
       </div>
-      {roundFields.map((field, index) => (
+      {formUrls.map((field, index) => (
         <div key={index}>
-          <div>Тур {index}:</div>
+          <div>{getRoundString(index)}:</div>
           <input className="border rounded px-2 py-1 ml-2"
             type="text"
             value={field}
-            onChange={event => handleRoundChange(index, event)}
+            onChange={event => handleFormUrlChange(index, event.target.value)}
           />
         </div>
       ))}
