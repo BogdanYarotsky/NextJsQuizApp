@@ -5,11 +5,10 @@ import { useState } from 'react';
 const VideoPlayer = ({ videoId }: { videoId: string }) => {
     return (
         <iframe
-            className="aspect-video rounded-lg shadow-lg mx-auto"
+            className="w-full md:w-[690px] aspect-video rounded-lg shadow-lg mx-auto"
             src={`https://www.youtube.com/embed/${videoId}`}
             title={`Youtube video ${videoId}`}
             frameBorder="0"
-            width={690}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen />
     );
