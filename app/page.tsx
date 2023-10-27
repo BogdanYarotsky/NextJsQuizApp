@@ -117,12 +117,6 @@ export default function Home() {
           className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full mr-2"
           onClick={removeFormUrlField}>Прибрати тур</button>
         <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mr-2"
-          onClick={removeFormUrlField}>Лінк</button>
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mr-2"
-          onClick={removeFormUrlField}>Опис</button>
-        <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
           onClick={openLinkInNewTab}>Превью</button>
       </div>

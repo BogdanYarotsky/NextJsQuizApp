@@ -5,8 +5,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Отакої! Квіз',
-  description: 'Реєстрація за посиланням https://linktr.ee/otakoyi.quiz',
+  title: 'Отакої!',
+  description: 'Твій улюблений україномовний квіз',
 }
 
 export default function RootLayout({
