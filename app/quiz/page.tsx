@@ -5,12 +5,11 @@ import { useState } from 'react';
 const VideoPlayer = ({ videoId }: { videoId: string }) => {
     return (
         <iframe
-            className="aspect-w-16 aspect-h-9 w-[70%] mx-auto"
-            width="560"
-            height="315"
+            className="aspect-video rounded-lg shadow-lg mx-auto"
             src={`https://www.youtube.com/embed/${videoId}`}
             title={`Youtube player: ${videoId}`}
             frameBorder="0"
+            width={690}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen />
     );
@@ -19,9 +18,9 @@ const VideoPlayer = ({ videoId }: { videoId: string }) => {
 const GoogleForm = ({ url }: { url: string }) => {
     return (
         <iframe
-            className="w-[70%] mx-auto"
+            className="w-full h-full mx-auto"
             src={url}
-            width="640" height="5000"
+            width="640"
             title={`Google Form: ${url}`}
         />
     );
@@ -37,22 +36,28 @@ export default function Quiz() {
     const [activeTab, setActiveTab] = useState(0);
 
     return (
-        <>
+        <div className='bg-custom-purple flex flex-col h-screen pt-5'>
             {videoParam && <VideoPlayer videoId={videoParam} />}
-            <div className='mt-2 mb-2 flex justify-center'>
+            <div className='mt-2 mb-3 flex justify-center'>
                 {formsUrls.map((_, index) => (
-                    <button className="bg-blue-500 text-white p-2 mx-1 rounded" key={index} onClick={() => setActiveTab(index)}>
-                        {index == formsUrls.length - 1 ? `Фінал` : `Тур ${index}`}
+                    <button
+                        className={`p-2 mx-1 rounded ${activeTab === index ?
+                            'bg-button-purple-hl text-white border-black border-2 font-semibold'
+                            : 'bg-button-purple text-white'}`}
+
+                        key={index}
+                        onClick={() => setActiveTab(index)}>
+                        {index === formsUrls.length - 1 ? `Фінал` : `Тур ${index}`}
                     </button>
                 ))}
             </div>
-            <div>
+            <div className='flex-grow'>
                 {formsUrls.map((url, index) => (
-                    <div key={index} style={{ display: index === activeTab ? 'block' : 'none' }}>
+                    <div className='h-full' key={index} style={{ display: index === activeTab ? 'block' : 'none' }}>
                         <GoogleForm url={url} />
                     </div>
                 ))}
             </div>
-        </>
+        </div>
     );
 }
