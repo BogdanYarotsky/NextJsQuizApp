@@ -7,7 +7,7 @@ const VideoPlayer = ({ videoId }: { videoId: string }) => {
         <iframe
             className="aspect-video rounded-lg shadow-lg mx-auto"
             src={`https://www.youtube.com/embed/${videoId}`}
-            title={`Youtube player: ${videoId}`}
+            title={`Youtube video ${videoId}`}
             frameBorder="0"
             width={690}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -15,13 +15,12 @@ const VideoPlayer = ({ videoId }: { videoId: string }) => {
     );
 };
 
-const GoogleForm = ({ url }: { url: string }) => {
+const GoogleForm = ({ formId }: { formId: string }) => {
     return (
         <iframe
             className="w-full h-full mx-auto"
-            src={url}
-            width="640"
-            title={`Google Form: ${url}`}
+            src={`https://forms.gle/${formId}`}
+            title={`Google Form ${formId}`}
         />
     );
 };
@@ -30,8 +29,8 @@ export default function Quiz() {
     const searchParams = useSearchParams()
     const videoParam = searchParams.get('video');
     const formsParam = searchParams.get('forms');
-    const formsUrls = formsParam === null ? []
-        : formsParam.split(".").map(id => `https://forms.gle/${id}`);
+    const formIds = formsParam === null ? []
+        : formsParam.split(".");
 
     const [activeTab, setActiveTab] = useState(0);
 
@@ -39,7 +38,7 @@ export default function Quiz() {
         <div className='bg-custom-purple flex flex-col h-screen pt-2'>
             {videoParam && <VideoPlayer videoId={videoParam} />}
             <div className='mt-2 mb-3 flex justify-center'>
-                {formsUrls.map((_, index) => (
+                {formIds.map((_, index) => (
                     <button
                         className={`p-2 mx-1 rounded ${activeTab === index ?
                             'bg-button-purple-hl text-white border-black border-2 font-semibold'
@@ -47,14 +46,14 @@ export default function Quiz() {
 
                         key={index}
                         onClick={() => setActiveTab(index)}>
-                        {index === formsUrls.length - 1 ? `Фінал` : `Тур ${index}`}
+                        {index === formIds.length - 1 ? `Фінал` : `Тур ${index}`}
                     </button>
                 ))}
             </div>
             <div className='flex-grow'>
-                {formsUrls.map((url, index) => (
+                {formIds.map((formId, index) => (
                     <div className='h-full' key={index} style={{ display: index === activeTab ? 'block' : 'none' }}>
-                        <GoogleForm url={url} />
+                        <GoogleForm formId={formId} />
                     </div>
                 ))}
             </div>
