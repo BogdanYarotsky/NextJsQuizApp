@@ -36,7 +36,7 @@ export default function Quiz() {
     const [activeTab, setActiveTab] = useState(0);
 
     return (
-        <div className='bg-custom-purple flex flex-col h-screen pt-5'>
+        <div className='bg-custom-purple flex flex-col h-screen pt-2'>
             {videoParam && <VideoPlayer videoId={videoParam} />}
             <div className='mt-2 mb-3 flex justify-center'>
                 {formsUrls.map((_, index) => (
