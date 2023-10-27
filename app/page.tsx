@@ -13,7 +13,6 @@ function extractYouTubeId(youtubeVideoUrl: string) {
 
     if (parsedUrl.pathname === "/watch") {
       const searchParams = new URLSearchParams(parsedUrl.search);
-      const videoId = searchParams.get('v');
       return searchParams.get('v') ?? extractYouTubeIdError;
     }
 
@@ -28,18 +27,19 @@ function extractYouTubeId(youtubeVideoUrl: string) {
 }
 
 function extractFormsIds(formUrls: string[]): (string | Error)[] {
-  return formUrls.map(url => {
+  return formUrls.map((url, index) => {
     try {
       const parsedUrl = new URL(url);
       if (parsedUrl.hostname !== "forms.gle") {
-        return new Error("URL is not a Google Forms URL");
+        return new Error("Посилання на тур " + index + " не є гугл формою.");
       }
       const pathSegments = parsedUrl.pathname.split("/");
       const formId = pathSegments[pathSegments.length - 1];
       return formId;
 
     } catch (error) {
-      return new Error("Invalid Google Forms Url");
+      const round = index == formUrls.length - 1 ? "Фінал" : `Тур ${index}`;
+      return new Error(`Посилання на ${round} не ок.`);
     }
   });
 }
